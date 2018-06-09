@@ -30,3 +30,9 @@ Human detecter topic:
 
 Base activate:  
 '$ roslaunch turtlebot_bringup minimal.launch'
+
+## Please fix it!
+~~~
+rospy.sleep(1)#wait 10 seconds
+~~~
+
