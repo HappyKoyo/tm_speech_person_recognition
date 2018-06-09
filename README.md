@@ -14,14 +14,19 @@ $ roslaunch realsense realsense_r200_launch.launch
 $ cd ~/catkin_ws/src/e_human_detector/darknet
 $ rosrun e_human_detector e_human_detector.py
 
-# TODO CommandCon
+## TODO CommandCon
 
 $ python ~/catkin_ws/src/tm_speech_person_recognition/scripts/spr.py
 ~~~
 ## Memo 
-activate:
-    crowd_list_req_pub.py
+activate:  
+'$ crowd_list_req_pub.py'
 
-human detecter topic memo
-$ rostopic pub /human_detect_req std_msgs/Bool "data: false" 
+Human detecter topic:  
+'$ rostopic pub /human_detect_req std_msgs/Bool "data: false"'
 
+3D Rider activate:  
+'$ roslaunch turtlebot_bringup 3dsensor.launch'
+
+Base activate:  
+'$ roslaunch turtlebot_bringup minimal.launch'
