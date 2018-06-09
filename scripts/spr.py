@@ -38,11 +38,11 @@ class SpeechAndPersonRecognition:
 
     def recogVoiceCB(self,sentence):
         ''' receive result word in speech_recog/scripts/speech_recog_normal.py '''
-        import types
-        print "Q : " + sentence.data
-        #self.recog_word = sentence
-        self.riddle_req_pub.publish(sentence.data)
-        print "send riddle request."
+        if main_state == 2 or main_state == 3:
+            print "Q : " + sentence.data
+            #self.recog_word = sentence
+            self.riddle_req_pub.publish(sentence.data)
+            print "send riddle request."
 
 
     def setIsActionSuccessCB(self,is_complete):
@@ -129,7 +129,7 @@ class SpeechAndPersonRecognition:
         #self.speech_req_pub.Publish(True) # start GoogleSpeechAPI's stream voice recognition
         rospy.sleep(3.0)
 
-        # loop five times
+        # loop 5 times
         reply_count = 0
         while reply_count < 5:
             if self.is_action_state != None:
@@ -145,13 +145,13 @@ class SpeechAndPersonRecognition:
         print 'state : 3'
         #self.speak("Let play blind mans bluff game")
 
-        # loop ten times
+        # loop 10 times
         reply_count = 0
         failure = None 
         while reply_count < 10:
             if self.is_action_state != None:
                 print "count : " + str(reply_count)
-                rotateVoiceDirection()
+                self.rotateVoiceDirection()
                 rospy.sleep(1.0) # wait rotate
                 if self.is_action_state is True: # Action success.
                     reply_count += 1
