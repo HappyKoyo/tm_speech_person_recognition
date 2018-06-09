@@ -11,18 +11,18 @@ class SpeechAndPersonRecognition:
     def __init__(self):
         self.crowd_list_res_sub = rospy.Subscriber('/object/list_res',String,self.getCrowdSizeCB)
         self.speech_sub = rospy.Subscriber('/voice_recog',String,self.recogVoiceCB)
-                
+
         self.crowd_list_req_pub = rospy.Publisher('/object/list_req',Bool,queue_size=1)
         self.speech_req_pub = rospy.Publisher('/speech/is_active',Bool,queue_size=1)
         self.riddle_req_pub = rospy.Publisher('/riddle_req',Bool,queue_size=1)
         self.head_angle_pub = rospy.Publisher('/m6_controller/command',Float64,queue_size=1)
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel_mux/input/teleop',Twist,queue_size=1)
-                                        
+
         self.crowd_list = []
         self.male_count = -1
         self.female_count = -1
 
-        
+
     def getCrowdSizeCB(self,result):
         self.crowd_list = result.data.split(' ')
         self.crowd_list[-1:] = []
@@ -34,7 +34,7 @@ class SpeechAndPersonRecognition:
         self.riddle_req_pub.Publish(sentence)
         print "send riddle request."
 
-        
+
     def rotateBase(self,angle):
         rotate_cmd = Twist()
         for i in range(angle):
@@ -44,11 +44,14 @@ class SpeechAndPersonRecognition:
             self.cmd_vel_pub.publish(rotate_cmd)
             rospy.sleep(0.035)
 
-            
+
     def speak(self,sentence):
-        voice_cmd = '/usr/bin/picospeaker %s' %sentence
-        subprocess.call(voice_cmd.strip().split(' '))
-        print "[PICO]" + sentence
+        try:
+            voice_cmd = '/usr/bin/picospeaker %s' %sentence
+            subprocess.call(voice_cmd.strip().split(' '))
+            print "[PICO]" + sentence
+        except OSError:
+            print "[PICO] not activate"
 
 
     def startSPR(self):#-----------------state 0
@@ -104,6 +107,7 @@ class SpeechAndPersonRecognition:
     def playRiddleGame(self):#----------state 2
         print 'state : 2'
         
+        # loop five count
         return 2 #this state
 
 
@@ -130,7 +134,8 @@ if __name__ == '__main__':
         if main_state == 0:
             main_state = spr.startSPR()
         elif main_state == 1:
-            main_state = spr.stateSizeOfTheCrowd()
+            main_state = 2 # pass main state
+            #main_state = spr.stateSizeOfTheCrowd()
         elif main_state == 2:
             main_state = spr.playRiddleGame()
         elif main_state == 3:
