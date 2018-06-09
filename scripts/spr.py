@@ -9,18 +9,24 @@ from geometry_msgs.msg import Twist
 
 class SpeechAndPersonRecognition:
     def __init__(self):
+        # Subuscriver----->
         self.crowd_list_res_sub = rospy.Subscriber('/object/list_res',String,self.getCrowdSizeCB)
         self.speech_sub = rospy.Subscriber('/voice_recog',String,self.recogVoiceCB)
+        self.riddle_req_sub = rospy.Subscriber('/riddle_res/is_action_state',Bool,self.setIsActionSuccessCB)
 
+        # Publisher------->
         self.crowd_list_req_pub = rospy.Publisher('/object/list_req',Bool,queue_size=1)
         self.speech_req_pub = rospy.Publisher('/speech/is_active',Bool,queue_size=1)
-        self.riddle_req_pub = rospy.Publisher('/riddle_req',Bool,queue_size=1)
+        self.riddle_req_pub = rospy.Publisher('/riddle_req/question',String,queue_size=1)
         self.head_angle_pub = rospy.Publisher('/m6_controller/command',Float64,queue_size=1)
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel_mux/input/teleop',Twist,queue_size=1)
+        #self.command_pub = rospy.Publisher('/command/question',String,queue_size=1)
 
         self.crowd_list = []
         self.male_count = -1
         self.female_count = -1
+        self.recog_word = ''
+        self.is_action_state = None # Success -> True, Failure -> False, No input -> None
 
 
     def getCrowdSizeCB(self,result):
@@ -31,8 +37,19 @@ class SpeechAndPersonRecognition:
 
 
     def recogVoiceCB(self,sentence):
-        self.riddle_req_pub.Publish(sentence)
+        ''' receive result word in speech_recog/scripts/speech_recog_normal.py '''
+        import types
+        print "Q : " + sentence.data
+        #self.recog_word = sentence
+        self.riddle_req_pub.publish(sentence.data)
         print "send riddle request."
+
+
+    def setIsActionSuccessCB(self,is_complete):
+        ''' receive message CommandControl/scripts/CommandControl.py '''
+        import types
+        print "success : " + str(is_complete.data)
+        self.is_action_state = is_complete.data
 
 
     def rotateBase(self,angle):
@@ -45,13 +62,17 @@ class SpeechAndPersonRecognition:
             rospy.sleep(0.035)
 
 
+    def rotateVoiceDirection(self):
+        pass
+
+
     def speak(self,sentence):
         try:
             voice_cmd = '/usr/bin/picospeaker %s' %sentence
             subprocess.call(voice_cmd.strip().split(' '))
             print "[PICO]" + sentence
         except OSError:
-            print "[PICO] not activate"
+            print "[PICO] Speacker is not activate."
 
 
     def startSPR(self):#-----------------state 0
@@ -65,7 +86,7 @@ class SpeechAndPersonRecognition:
         self.speak("I want to play riddle game!")
         rospy.sleep(1)#wait 10 seconds
         self.rotateBase(100) # rotateBase(): 
-        rospy.sleep(1)
+        rospy.sleep(1.0)
         self.crowd_list_req_pub.publish(True)    
         return 1 #next state
 
@@ -79,40 +100,63 @@ class SpeechAndPersonRecognition:
             return 1 #this state
         #state number of male
         if self.male_count == 0:
-            speak('There is not male.')
+            self.speak('There is not male.')
         elif self.male_count == 1:
-            speak('There is ' + str(self.male_count) + ' male.')
+            self.speak('There is ' + str(self.male_count) + ' male.')
         else:
-            speak('There are ' + str(self.male_count) + ' males.')
+            self.speak('There are ' + str(self.male_count) + ' males.')
         rospy.sleep(1)
-        speak("and ")
+        self.speak("and ")
         rospy.sleep(1)
         #state number of female
         if self.female_count == 0:
-            speak('There is not female.')
+            self.speak('There is not female.')
         elif self.female_count == 1:
-            speak('There is ' + str(self.female_count) + ' female.')
+            self.speak('There is ' + str(self.female_count) + ' female.')
         else:
-            speak('There are ' + str(self.female_count) + ' females.')
+            self.speak('There are ' + str(self.female_count) + ' females.')
         #state sum of crowd
-        speak("There are "+str(self.male_count+self.female_count)+" people in total.")
+        self.speak("There are "+str(self.male_count+self.female_count)+" people in total.")
         rospy.sleep(2.0)
-        speak("Who want to play riddles with me?")
-        rospy.sleep(3.0)
-        self.speech_req_pub.Publish(True) # start google speech api stream
         
         return 2 #next state
 
 
     def playRiddleGame(self):#----------state 2
+        ''' Robot reply in same angle '''
         print 'state : 2'
-        
-        # loop five count
-        return 2 #this state
+        self.speak("Who want to play riddles with me?")
+        #self.speech_req_pub.Publish(True) # start GoogleSpeechAPI's stream voice recognition
+        rospy.sleep(3.0)
+
+        # loop five times
+        reply_count = 0
+        while reply_count < 5:
+            if self.is_action_state != None:
+                print "count : " + str(reply_count)
+                self.is_action_state = None
+                reply_count += 1
+
+        return 3 #this state
 
 
     def startBlindMansBluffGame(self):#--state 3
+        ''' Robot rotate and reply '''
         print 'state : 3'
+        #self.speak("Let play blind mans bluff game")
+
+        # loop ten times
+        reply_count = 0
+        while reply_count < 10:
+            if self.is_action_state != None:
+                print "count : " + str(reply_count)
+                rotateVoiceDirection()
+                rospy.sleep(1.0) # wait rotate
+                if self.is_action_state is True: # Action success.
+                    reply_count += 1
+                elif self.is_action_state is False: # Action failure.
+                    pass
+                self.is_action_state = None
 
         return 4
 
