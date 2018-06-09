@@ -48,7 +48,7 @@ class SpeechAndPersonRecognition:
     def speak(self,sentence):
         voice_cmd = '/usr/bin/picospeaker %s' %sentence
         subprocess.call(voice_cmd.strip().split(' '))
-        print [PICO] + sentence
+        print "[PICO]" + sentence
 
 
     def startSPR(self):#-----------------state 0
