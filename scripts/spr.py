@@ -147,6 +147,7 @@ class SpeechAndPersonRecognition:
 
         # loop ten times
         reply_count = 0
+        failure = None 
         while reply_count < 10:
             if self.is_action_state != None:
                 print "count : " + str(reply_count)
@@ -154,8 +155,14 @@ class SpeechAndPersonRecognition:
                 rospy.sleep(1.0) # wait rotate
                 if self.is_action_state is True: # Action success.
                     reply_count += 1
-                elif self.is_action_state is False: # Action failure.
-                    pass
+                    failure = False
+                else: # Action failure.
+                    if failure is True:
+                        reply_count += 1
+                        failure = False
+                    else:
+                        failure = True
+
                 self.is_action_state = None
 
         return 4

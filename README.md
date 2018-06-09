@@ -14,7 +14,8 @@ $ roslaunch realsense realsense_r200_launch.launch
 $ cd ~/catkin_ws/src/e_human_detector/darknet
 $ rosrun e_human_detector e_human_detector.py
 
-## TODO CommandCon
+$ python ~/catkin_ws/src/speech_recog/scripts/speech_recog_normal.py
+$ python ~/catkin_ws/src/CommandControl/scripts/CommandControl.py
 
 $ python ~/catkin_ws/src/tm_speech_person_recognition/scripts/spr.py
 ~~~
