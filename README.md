@@ -18,6 +18,9 @@ $ python ~/catkin_ws/src/speech_recog/scripts/speech_recog_normal.py
 $ python ~/catkin_ws/src/CommandControl/scripts/CommandControl.py
 
 $ python ~/catkin_ws/src/tm_speech_person_recognition/scripts/spr.py
+
+$ cd ~/catkin_ws/src/hark_localize
+$ bash hark_localize.sh
 ~~~
 ## Memo 
 activate:  
@@ -36,4 +39,8 @@ Base activate:
 ~~~
 rospy.sleep(1)#wait 10 seconds
 ~~~
+
+## Install
+Google TTS  
+`google-cloud-texttospeech==0.1.0`
 

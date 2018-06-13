@@ -7,6 +7,9 @@ import time
 from std_msgs.msg import String, Float64,Bool
 import subprocess
 from geometry_msgs.msg import Twist
+from hark_msgs.msg import HarkSource
+
+import google_tts
 
 class SpeechAndPersonRecognition:
     def __init__(self):
@@ -23,6 +26,7 @@ class SpeechAndPersonRecognition:
         #self.riddle_req_dict_pub = rospy.Publisher('/riddle_req/question_dict',String,queue_size=1)
         self.head_angle_pub = rospy.Publisher('/m6_controller/command',Float64,queue_size=1)
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel_mux/input/teleop',Twist,queue_size=1)
+        self.hark_pub = rospy.Publisher('HarkSource',HarkSource,queue_size=1)
         #self.command_pub = rospy.Publisher('/command/question',String,queue_size=1)
 
         self.crowd_list = []
@@ -98,16 +102,20 @@ class SpeechAndPersonRecognition:
 
 
     def rotateVoiceDirection(self):
-        pass
+        print('rotateVoiceDirection')
+        self.hark_pub.publish()
 
 
     def speak(self,sentence):
+        google_tts.say(sentence)
+        '''
         try:
             voice_cmd = '/usr/bin/picospeaker %s' %sentence
             subprocess.call(voice_cmd.strip().split(' '))
-            print "[PICO]" + sentence
+            print "[PICO] " + sentence
         except OSError:
             print "[PICO] Speacker is not activate. Or not installed picospeaker."
+        '''
 
 
     def sound(self):
@@ -129,7 +137,7 @@ class SpeechAndPersonRecognition:
         time.sleep(2.0) # move time
         #start riddle game
         self.speak("I want to play riddle game!")
-        time.sleep(1)#wait 10 seconds
+        time.sleep(2)#wait 10 seconds
         self.rotateBase(100) # rotateBase(): 
         time.sleep(1.0)
         self.crowd_list_req_pub.publish(True)    
@@ -138,6 +146,7 @@ class SpeechAndPersonRecognition:
 
     def stateSizeOfTheCrowd(self):#------state 1
         '''
+            Writter: Enomoto 
         '''
         print 'state : 1'
         if len(self.crowd_list) == 0: # tuusinn yabai?
@@ -175,10 +184,11 @@ class SpeechAndPersonRecognition:
         '''
         print 'state : 2'
         self.speak("Who want to play riddles with me?")
-        time.sleep(3.0)
+        time.sleep(4.0)
         self.speak("Please speak after the signal")
-        time.sleep(3.0)
+        time.sleep(4.0)
         self.sound()
+        time.sleep(1.5)
         #self.speech_req_pub.Publish(True) # start GoogleSpeechAPI's stream voice recognition
 
         # loop 5 times
@@ -207,11 +217,14 @@ class SpeechAndPersonRecognition:
             This game allow once failure.
         '''
         print 'state : 3'
-        self.speak("Let's play blind mans bluff geme")
-        time.sleep(3.0)
-        self.speak("Please speak after the signal")
-        time.sleep(3.0)
+        self.speak("Let's play blind mans bluff game")
+        time.sleep(6.0)
+        self.speak("Please speak")
+        time.sleep(4.0)
+        self.speak("After the signal")
+        time.sleep(10.0)
         self.sound()
+        time.sleep(1.5)
 
         # loop 5 times
         TASK_LIMIT = 5
@@ -219,6 +232,8 @@ class SpeechAndPersonRecognition:
         failure = 0
         while reply < TASK_LIMIT:
             if self.is_action_result != None:
+                self.is_action_result = None
+                self.is_do_not_send_command = True
                 print "count : " + str(reply)
                 self.rotateVoiceDirection()
                 time.sleep(1.0) # wait rotate
@@ -232,17 +247,25 @@ class SpeechAndPersonRecognition:
                         failure = 0
                         reply += 1
                 if reply != TASK_LIMIT: # sound
-                    time.sleep(2.0)
+                    #time.sleep(2.0)
                     self.sound()
-                self.is_action_result = None
+                self.is_do_not_send_command = False
         return 4
 
 
     def leaveArena(self):#---------------state 4
+        '''
+            Writter: Enomoto
+        '''
         print 'state : 4'
+        time.sleep(1.0)
+        self.speak("I will finish the game")
+        time.sleep(3.0)
+        '''
         navigation_req = String()
         navigation_req.data = 'entrance'
         self.navigation_req_pub.publish
+        '''
 
         return 5
 
@@ -258,7 +281,8 @@ if __name__ == '__main__':
             main_state = 2 # pass main state
             #main_state = spr.stateSizeOfTheCrowd()
         elif main_state == 2:
-            main_state = spr.playRiddleGame()
+            #main_state = spr.playRiddleGame()
+            main_state = 3
         elif main_state == 3:
             main_state = spr.startBlindMansBluffGame()
         elif main_state == 4:
