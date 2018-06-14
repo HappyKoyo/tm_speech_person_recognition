@@ -72,7 +72,8 @@ $ python ~/catkin_ws/src/speech_recog/scripts/speech_recog_normal.py
 ```
 $ python ~/catkin_ws/src/tm_speech_person_recognition/scripts/spr.py
 ```
-++++++++++++++++++++++++++++++
+
+--------------------------------
 ## Please fix it!
 ```
 rospy.sleep(1)#wait 10 seconds
