@@ -50,10 +50,11 @@ class SpeechAndPersonRecognition:
         print('recogVoiceWordCB')
         if self.is_do_not_send_command == False:
             if main_state == 2 or main_state == 3:
+                self.is_do_not_send_command = True
                 print "Q : " + sentence.data
+                print "send riddle request."
                 #self.recog_word = sentence
                 self.riddle_req_word_pub.publish(sentence.data)
-                print "send riddle request."
 
     
     def recogVoiceDictCB(self,_json_str):
@@ -65,9 +66,9 @@ class SpeechAndPersonRecognition:
         print(voice_json['word'])
         if main_state == 2 or main_state == 3:
             print "Q : " + voice_json['word']
+            print "send riddle request."
             #self.recog_word = sentence
             self.riddle_req_dict_pub.publish(_json_str) # without change
-            print "send riddle request."
 
 
     def setIsActionSuccessCB(self,is_complete):
@@ -196,15 +197,15 @@ class SpeechAndPersonRecognition:
         reply = 0
         while reply < TASK_LIMIT:
             if self.is_action_result != None:
-                self.is_do_not_send_command = True
                 self.is_action_result = None
                 print "count : " + str(reply)
                 reply += 1
 
                 # Wait for not picking up the sound from the PC
                 if reply != TASK_LIMIT: # sound
-                    time.sleep(2.0)
+                    time.sleep(3.0)
                     self.sound()
+                    time.sleep(1.5)
                 self.is_do_not_send_command = False
 
         return 3 #this state
@@ -219,10 +220,9 @@ class SpeechAndPersonRecognition:
         print 'state : 3'
         self.speak("Let's play blind mans bluff game")
         time.sleep(6.0)
-        self.speak("Please speak")
+        self.speak("Please speak After the signal")
+        print(self.is_action_result)
         time.sleep(4.0)
-        self.speak("After the signal")
-        time.sleep(10.0)
         self.sound()
         time.sleep(1.5)
 
@@ -233,7 +233,6 @@ class SpeechAndPersonRecognition:
         while reply < TASK_LIMIT:
             if self.is_action_result != None:
                 self.is_action_result = None
-                self.is_do_not_send_command = True
                 print "count : " + str(reply)
                 self.rotateVoiceDirection()
                 time.sleep(1.0) # wait rotate
@@ -247,8 +246,9 @@ class SpeechAndPersonRecognition:
                         failure = 0
                         reply += 1
                 if reply != TASK_LIMIT: # sound
-                    #time.sleep(2.0)
+                    time.sleep(3.0)
                     self.sound()
+                    time.sleep(1.5)
                 self.is_do_not_send_command = False
         return 4
 
