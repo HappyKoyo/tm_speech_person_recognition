@@ -6,13 +6,14 @@
 1. Enomoto
 2. Makino
 3. Okano
-# 大会チェックリスト
+# :triangular_flag_on_post::triangular_flag_on_post::triangular_flag_on_post:大会チェックリスト:triangular_flag_on_post::triangular_flag_on_post::triangular_flag_on_post:
 ## ハードウェア
 - [ ] USE+イヤホンジャックが刺さっているかを確認
 - [ ] 緊急停止スイッチOFF
 - [ ] PC起動後にスピーカーの電源ON**(青く光っているか)**
 - [ ] スピーカーはしっかりと接触しているか
 - [ ] 設定->サウンド->入力装置->内部オーディオを消音にし、MobilePreをONにする
+- [ ] MobilePreマイクに触れて、動作していることを確認する
 - [ ] 音声の出力をunavailableにする
 - [ ] $ sh mic_check.sh(一度エラーが起こる)
 - [ ] $ 機体のスイッチをONにする
@@ -38,7 +39,7 @@ $ sudo chmod 666 /dev/ttyACM0
 ```
 $ roslaunch turtlebot_bringup minimal.launch
 ```
-- [ ] 方向同定プログラム起動
+- [ ] hark_localize起動
 ```
 $ cd ~/catkin_ws/src/hark_localize.py
 ```
