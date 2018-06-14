@@ -245,10 +245,12 @@ class SpeechAndPersonRecognition:
                     if failure == 2:
                         failure = 0
                         reply += 1
+
+                # Wait for do not get own voice!!!
+                time.sleep(5.0) # <-------------------- Very important. For do not get own voice
                 if reply != TASK_LIMIT: # sound
-                    time.sleep(3.0)
                     self.sound()
-                    time.sleep(1.5)
+                time.sleep(2.0)
                 self.is_do_not_send_command = False
         return 4
 
@@ -281,7 +283,7 @@ if __name__ == '__main__':
             main_state = 2 # pass main state
             #main_state = spr.stateSizeOfTheCrowd()
         elif main_state == 2:
-            #main_state = spr.playRiddleGame()
+            main_state = spr.playRiddleGame()
             main_state = 3
         elif main_state == 3:
             main_state = spr.startBlindMansBluffGame()
