@@ -6,6 +6,8 @@
 1. Enomoto
 2. Makino
 3. Okano
+
+--------------------------------------
 # :triangular_flag_on_post::triangular_flag_on_post::triangular_flag_on_post:大会チェックリスト:triangular_flag_on_post::triangular_flag_on_post::triangular_flag_on_post:
 ## ハードウェア
 - [ ] USE+イヤホンジャックが刺さっているかを確認
