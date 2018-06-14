@@ -1,10 +1,13 @@
 # Speech Person Recognition 2018 in Canada
+## Overview
+ロボカップ@homeのSPRタスクのためのpythonスクリプト。  
+音声認識や人認識のプログラムなどと通信を行う。  
 ## Writter
 1. Enomoto
 2. Makino
 3. Okano
-## 大会チェックリスト
-
+# 大会チェックリスト
+## ハードウェア
 - [ ] USE+イヤホンジャックが刺さっているかを確認
 - [ ] 緊急停止スイッチOFF
 - [ ] PC起動後にスピーカーの電源ON**(青く光っているか)**
@@ -14,7 +17,7 @@
 - [ ] $ sh mic_check.sh(一度エラーが起こる)
 - [ ] $ 機体のスイッチをONにする
 - [ ] 充電器を抜く
-## Use
+## ソフトウェア
 1. リアルセンス
 - [ ] リアルセンスが起動できるか
 ```
@@ -39,9 +42,12 @@ $ roslaunch turtlebot_bringup minimal.launch
 ```
 $ cd ~/catkin_ws/src/hark_localize.py
 ```
-- [ ] Harkのデバイス番号を確認、harkのデバイス設定
+- [ ] Harkのデバイス番号を確認
 ```
 $ arecord -l
+```
+- [ ] harkのデバイス設定、起動
+```
 $ vim hark_localize.sh
 $ ./ros-localize.sh
 ```
