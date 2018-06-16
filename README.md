@@ -41,9 +41,9 @@ $ sudo chmod 666 /dev/ttyACM0
 ```
 $ roslaunch turtlebot_bringup minimal.launch
 ```
-- [ ] hark_localize起動
+- [ ] hark_localize
 ```
-$ cd ~/catkin_ws/src/hark_localize.py
+$ cd ~/catkin_ws/src/hark_localize
 ```
 - [ ] Harkのデバイス番号を確認
 ```
@@ -51,7 +51,7 @@ $ arecord -l
 ```
 - [ ] harkのデバイス設定、起動
 ```
-$ vim hark_localize.sh
+$ vim ros_localize.sh
 $ ./ros-localize.sh
 ```
 - [ ] SpeechMove起動
