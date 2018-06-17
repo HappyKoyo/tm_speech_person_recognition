@@ -17,7 +17,7 @@ class SpeechAndPersonRecognition:
         self.crowd_list_res_sub = rospy.Subscriber('/object/list_res',String,self.getCrowdSizeCB)
         self.speech_word_sub = rospy.Subscriber('/voice_recog',String,self.recogVoiceWordCB)
         #self.speech_dict_sub = rospy.Subscriber('/voice_recog_dict',String,self.recogVoiceDictCB)
-        self.riddle_req_sub = rospy.Subscriber('/riddle_res/is_action_result',Bool,self.setIsActionSuccessCB)
+        self.riddle_req_sub = rospy.Subscriber('/riddle_res/result_str',String,self.setRiddleResultCB)
 
         # Publisher------->
         self.crowd_list_req_pub = rospy.Publisher('/object/list_req',Bool,queue_size=1)
@@ -28,13 +28,14 @@ class SpeechAndPersonRecognition:
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel_mux/input/teleop',Twist,queue_size=1)
         self.hark_pub = rospy.Publisher('HarkSource',HarkSource,queue_size=1)
         #self.command_pub = rospy.Publisher('/command/question',String,queue_size=1)
+        self.req_pub = rospy.Publisher('/speech/localization_req',Bool,queue_size=1)
 
         self.crowd_list = []
         self.male_count = -1
         self.female_count = -1
         self.recog_word = ''
         self.is_action_result = None # Success -> True, Failure -> False, No input -> None
-        self.is_do_not_send_command = False 
+        self.is_do_not_send_command = True
 
     # CallBack Functions ---------------->
 
@@ -47,7 +48,7 @@ class SpeechAndPersonRecognition:
 
     def recogVoiceWordCB(self,sentence):
         ''' receive result word in speech_recog/scripts/speech_recog_normal.py '''
-        print('recogVoiceWordCB')
+        print('recogVoiceWordCB', self.is_do_not_send_command, main_state)
         if self.is_do_not_send_command == False:
             if main_state == 2 or main_state == 3:
                 self.is_do_not_send_command = True
@@ -55,13 +56,14 @@ class SpeechAndPersonRecognition:
                 print "send riddle request."
                 #self.recog_word = sentence
                 self.riddle_req_word_pub.publish(sentence.data)
+            else:
+                print "not main_state 2,3"
+        else:
+            print "is_do_not_send_command is True"
 
     
     def recogVoiceDictCB(self,_json_str):
-        '''
-            Receive json string. It need to perse json().
-            It function pass voice recognition result without change.
-        '''
+        # Receive json string. It need to perse json().  It function pass voice recognition result without change. 
         voice_json = self.JsonStringToDictation(_json_str.data)
         print(voice_json['word'])
         if main_state == 2 or main_state == 3:
@@ -71,11 +73,19 @@ class SpeechAndPersonRecognition:
             self.riddle_req_dict_pub.publish(_json_str) # without change
 
 
-    def setIsActionSuccessCB(self,is_complete):
+    def setRiddleResultCB(self,result):
         ''' receive message CommandControl/scripts/CommandControl.py '''
-        import types
-        print "success : " + str(is_complete.data)
-        self.is_action_result = is_complete.data
+        result.data
+        print "cmd result : " + result.data
+        if result.data == 'None':
+            self.is_do_not_send_command = False 
+        elif result.data == 'True':
+            self.is_action_result = True
+        elif result.data == 'False':
+            self.is_action_result = False
+        else:
+            print('[setRiddleResultCB] unknown result')
+        print "is_action_result : " + str(self.is_action_result)
 
 
     def JsonStringToDictation(self, _json):
@@ -105,18 +115,17 @@ class SpeechAndPersonRecognition:
     def rotateVoiceDirection(self):
         print('rotateVoiceDirection')
         self.hark_pub.publish()
+        self.req_pub.publish(True)
 
 
     def speak(self,sentence):
-        google_tts.say(sentence)
-        '''
+        #google_tts.say(sentence)
         try:
             voice_cmd = '/usr/bin/picospeaker %s' %sentence
             subprocess.call(voice_cmd.strip().split(' '))
             print "[PICO] " + sentence
         except OSError:
             print "[PICO] Speacker is not activate. Or not installed picospeaker."
-        '''
 
 
     def sound(self):
@@ -187,9 +196,11 @@ class SpeechAndPersonRecognition:
         self.speak("Who want to play riddles with me?")
         time.sleep(4.0)
         self.speak("Please speak after the signal")
-        time.sleep(4.0)
+        time.sleep(2.5)
         self.sound()
         time.sleep(1.5)
+        self.is_do_not_send_command = False
+        # process --------------------------->
         #self.speech_req_pub.Publish(True) # start GoogleSpeechAPI's stream voice recognition
 
         # loop 5 times
@@ -208,6 +219,8 @@ class SpeechAndPersonRecognition:
                     time.sleep(1.5)
                 self.is_do_not_send_command = False
 
+        self.is_do_not_send_command = True
+        # <---------------------------process
         return 3 #this state
 
 
@@ -219,12 +232,15 @@ class SpeechAndPersonRecognition:
         '''
         print 'state : 3'
         self.speak("Let's play blind mans bluff game")
-        time.sleep(6.0)
+        time.sleep(4.0)
         self.speak("Please speak After the signal")
         print(self.is_action_result)
-        time.sleep(4.0)
+        time.sleep(2.5)
         self.sound()
         time.sleep(1.5)
+        self.is_do_not_send_command = False
+        self.rotateVoiceDirection()
+        # process --------------------------->
 
         # loop 5 times
         TASK_LIMIT = 5
@@ -232,9 +248,7 @@ class SpeechAndPersonRecognition:
         failure = 0
         while reply < TASK_LIMIT:
             if self.is_action_result != None:
-                self.is_action_result = None
                 print "count : " + str(reply)
-                self.rotateVoiceDirection()
                 time.sleep(1.0) # wait rotate
 
                 if self.is_action_result is True: # Action success.
@@ -252,6 +266,10 @@ class SpeechAndPersonRecognition:
                     self.sound()
                 time.sleep(2.0)
                 self.is_do_not_send_command = False
+                self.is_action_result = None
+
+        self.is_do_not_send_command = True
+        # <---------------------------process
         return 4
 
 
@@ -280,8 +298,8 @@ if __name__ == '__main__':
         if main_state == 0:
             main_state = spr.startSPR()
         elif main_state == 1:
-            main_state = 2 # pass main state
             #main_state = spr.stateSizeOfTheCrowd()
+            main_state = 2 # pass main state
         elif main_state == 2:
             main_state = spr.playRiddleGame()
             main_state = 3

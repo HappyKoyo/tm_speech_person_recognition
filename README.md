@@ -10,9 +10,10 @@
 --------------------------------------
 # :triangular_flag_on_post::triangular_flag_on_post::triangular_flag_on_post:大会チェックリスト:triangular_flag_on_post::triangular_flag_on_post::triangular_flag_on_post:
 ## ハードウェア
-- [ ] USE+イヤホンジャックが刺さっているかを確認
+- [ ] USB+イヤホンジャックが刺さっているかを確認
 - [ ] 緊急停止スイッチOFF
 - [ ] PC起動後にスピーカーの電源ON、スピーカーのLEDが**青く光っているか**を確認
+- [ ] adjust speacker boryu-mu
 - [ ] スピーカーはしっかりと接触しているか
 - [ ] 設定->サウンド->入力装置->内部オーディオを消音にし、MobilePreをONにする
 - [ ] MobilePreマイクに触れて、動作していることを確認する
@@ -25,6 +26,7 @@
 - [ ] リアルセンスが起動できるか
 ```
 $ roslaunch realsense realsense_r200_launch.launch
+$ rpt
 ```
 2. 人検知
 - [ ] HumanDetectorを起動する
@@ -33,30 +35,26 @@ $ cd ~/catkin_ws/src/e_human_detector/darknet
 $ rosrun e_human_detector e_human_detector.py
 ```
 3. Hark
-- [ ] Harkとの接続
-```
-$ sudo chmod 666 /dev/ttyACM0
-```
 - [ ] マニピュレーションの有効化
 ```
 $ roslaunch turtlebot_bringup minimal.launch
+---> sound
 ```
 - [ ] hark_localize
 ```
 $ cd ~/catkin_ws/src/hark_localize
 ```
-- [ ] Harkのデバイス番号を確認
+- [ ] Harkのデバイス番号を確認、plughw設定
 ```
 $ arecord -l
-```
-- [ ] harkのデバイス設定、起動
-```
 $ vim ros_localize.sh
+```
+- [ ] harkの起動
 $ ./ros-localize.sh
 ```
 - [ ] SpeechMove起動
 ```
-$ cd ~/catkin_ws/src/speech_move/src
+$ cd ~/catkin_ws/src/speech_move/scripts
 $ python speech_move.py
 ```
 - [ ] Command controler起動
@@ -101,3 +99,8 @@ Base activate:
 $ roslaunch turtlebot_bringup minimal.launch
 
 
+## Unknown 
+- [ ] Harkとの接続
+```
+$ sudo chmod 666 /dev/ttyACM0
+```
