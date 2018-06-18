@@ -48,18 +48,19 @@ class SpeechAndPersonRecognition:
 
     def recogVoiceWordCB(self,sentence):
         ''' receive result word in speech_recog/scripts/speech_recog_normal.py '''
-        print('recogVoiceWordCB', self.is_do_not_send_command, main_state)
+        print('[SUB] recogVoiceWordCB', self.is_do_not_send_command)
+        print(sentence.data)
         if self.is_do_not_send_command == False:
             if main_state == 2 or main_state == 3:
                 self.is_do_not_send_command = True
-                print "Q : " + sentence.data
-                print "send riddle request."
+                print "[SUB] Q : " + sentence.data
+                print "[SUB] send riddle request."
                 #self.recog_word = sentence
                 self.riddle_req_word_pub.publish(sentence.data)
             else:
-                print "not main_state 2,3"
+                print "[SUB] not main_state 2,3"
         else:
-            print "is_do_not_send_command is True"
+            print "[SUB] is_do_not_send_command is True"
 
     
     def recogVoiceDictCB(self,_json_str):
@@ -67,8 +68,8 @@ class SpeechAndPersonRecognition:
         voice_json = self.JsonStringToDictation(_json_str.data)
         print(voice_json['word'])
         if main_state == 2 or main_state == 3:
-            print "Q : " + voice_json['word']
-            print "send riddle request."
+            print "[SUB] Q : " + voice_json['word']
+            print "[SUB] send riddle request."
             #self.recog_word = sentence
             self.riddle_req_dict_pub.publish(_json_str) # without change
 
@@ -76,16 +77,19 @@ class SpeechAndPersonRecognition:
     def setRiddleResultCB(self,result):
         ''' receive message CommandControl/scripts/CommandControl.py '''
         result.data
-        print "cmd result : " + result.data
+        print "[SUB] cmd result : " + result.data
         if result.data == 'None':
+            # Nothing todo
             self.is_do_not_send_command = False 
         elif result.data == 'True':
+            # OK
             self.is_action_result = True
         elif result.data == 'False':
+            # Recognition false
             self.is_action_result = False
         else:
-            print('[setRiddleResultCB] unknown result')
-        print "is_action_result : " + str(self.is_action_result)
+            print('[SUB] setRiddleResultCB. unknown result')
+        print "[SUB] is_action_result : " + str(self.is_action_result)
 
 
     def JsonStringToDictation(self, _json):
@@ -147,7 +151,7 @@ class SpeechAndPersonRecognition:
         time.sleep(2.0) # move time
         #start riddle game
         self.speak("I want to play riddle game!")
-        time.sleep(2)#wait 10 seconds
+        time.sleep(10)#wait 10 seconds
         self.rotateBase(100) # rotateBase(): 
         time.sleep(1.0)
         self.crowd_list_req_pub.publish(True)    
@@ -194,9 +198,9 @@ class SpeechAndPersonRecognition:
         '''
         print 'state : 2'
         self.speak("Who want to play riddles with me?")
-        time.sleep(4.0)
+        time.sleep(0.5)
         self.speak("Please speak after the signal")
-        time.sleep(2.5)
+        time.sleep(2.0)
         self.sound()
         time.sleep(1.5)
         self.is_do_not_send_command = False
@@ -232,7 +236,7 @@ class SpeechAndPersonRecognition:
         '''
         print 'state : 3'
         self.speak("Let's play blind mans bluff game")
-        time.sleep(4.0)
+        time.sleep(2.0)
         self.speak("Please speak After the signal")
         print(self.is_action_result)
         time.sleep(2.5)
@@ -254,17 +258,41 @@ class SpeechAndPersonRecognition:
                 if self.is_action_result is True: # Action success.
                     failure = 0
                     reply += 1
+
+                    self.speak("Please say next question")
+                    time.sleep(1)
+                    self.speak("After the signal")
+                    time.sleep(1)
+
                 else: # Action failure.
                     failure += 1
-                    if failure == 2:
+
+                    if failure == 2: # double miss
                         failure = 0
                         reply += 1
 
+                        if reply != TASK_LIMIT:
+                            self.speak("Please say next question")
+                            time.sleep(1)
+                            self.speak("After the signal")
+                            time.sleep(1)
+                        else:
+                            # Last.
+                            pass
+                    else: # single miss
+                        self.speak("Please say again")
+                        time.sleep(1)
+                        self.speak("After the signal")
+                        time.sleep(1)
+
+
                 # Wait for do not get own voice!!!
-                time.sleep(5.0) # <-------------------- Very important. For do not get own voice
                 if reply != TASK_LIMIT: # sound
+                    time.sleep(5.0) # <-------------------- Very important. For do not get own voice
                     self.sound()
-                time.sleep(2.0)
+                    time.sleep(2.0)
+                else:
+                    pass
                 self.is_do_not_send_command = False
                 self.is_action_result = None
 
@@ -299,6 +327,10 @@ if __name__ == '__main__':
             main_state = spr.startSPR()
         elif main_state == 1:
             #main_state = spr.stateSizeOfTheCrowd()
+            time.sleep(3)
+            spr.speak("Sorry")
+            spr.speak("I cannot person detect")
+            time.sleep(3)
             main_state = 2 # pass main state
         elif main_state == 2:
             main_state = spr.playRiddleGame()

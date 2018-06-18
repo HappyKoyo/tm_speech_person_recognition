@@ -12,12 +12,14 @@
 ## ハードウェア
 - [ ] USB+イヤホンジャックが刺さっているかを確認
 - [ ] 緊急停止スイッチOFF
+- [ ] tamago zure check
 - [ ] PC起動後にスピーカーの電源ON、スピーカーのLEDが**青く光っているか**を確認
 - [ ] adjust speacker boryu-mu
 - [ ] スピーカーはしっかりと接触しているか
 - [ ] 設定->サウンド->入力装置->内部オーディオを消音にし、MobilePreをONにする
 - [ ] MobilePreマイクに触れて、動作していることを確認する
 - [ ] 音声の出力をunavailableにする
+- [ ] audio dekaino hikari check
 - [ ] `sh mic_check.sh`(一度エラーが起こる)
 - [ ] 機体のスイッチをONにする
 - [ ] 充電器を抜く
